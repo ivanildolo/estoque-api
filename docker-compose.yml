@@ -1,0 +1,26 @@
+
+version: '3'
+services:
+  postgres:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pg-dataset:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: estoque
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on: 
+      - postgres
+    ports:
+      - "53603:53603"
+      - "80:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ivanildosilvalima@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+
+volumes:
+  pg-dataset:
