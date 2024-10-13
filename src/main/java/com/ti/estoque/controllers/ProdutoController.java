@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/products")
+@RequestMapping("api/v1/products")
 public class ProdutoController {
 
 	@Autowired
@@ -52,5 +52,16 @@ public class ProdutoController {
 		productService.deleteById(id);
 		return ResponseEntity.noContent().build();
 	}
+
+	@GetMapping("/report/excess-stock")
+	public List<Product> getStockQuantityGreaterThan(@RequestParam int maxQuantity) {
+		return productService.findByStockQuantityGreaterThan(maxQuantity);
+	}
+
+	@GetMapping("/report/low-stock")
+	public List<Product> getByStockQuantityLessThan(@RequestParam int minQuantity) {
+		return productService.findByStockQuantityLessThan(minQuantity);
+	}
+
 
 }

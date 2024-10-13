@@ -1,7 +1,7 @@
 package com.ti.estoque.services;
 
 import com.ti.estoque.models.Product;
-import com.ti.estoque.repository.ProdutoRepository;
+import com.ti.estoque.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.List;
 public class ProductService {
 
     @Autowired
-    private ProdutoRepository productRepository;
+    private ProductRepository productRepository;
 
     public Product saveProduct(Product product) {
         return productRepository.save(product);
@@ -43,5 +43,13 @@ public class ProductService {
         Product produto = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto não encontrado"));
         produto.setStockQuantity(produto.getStockQuantity() + quantidade);
         return productRepository.save(produto);
+    }
+
+    public List<Product> findByStockQuantityLessThan(int minimumQuantity) {
+        return productRepository.findByStockQuantityLessThan(minimumQuantity);
+    }
+
+    public List<Product> findByStockQuantityGreaterThan(int maxQuantity) {
+        return productRepository.findByStockQuantityGreaterThan(maxQuantity);
     }
 }
