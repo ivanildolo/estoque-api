@@ -54,4 +54,5 @@ Para rodar o projeto Spring Boot, você pode usar uma das seguintes ferramentas:
 1.  Abra o projeto na IntelliJ.
 2.  Certifique-se de que todas as dependências estão corretamente configuradas.
 3.  Clique com o botão direito na classe principal (geralmente marcada com `@SistemaDeGerenciamentoDeEstoque`).
+4.  Edite configuracao do debug acrescente `--spring.profiles.active=dev` no campo Program arguments
 4.  Selecione "Run" para iniciar a aplicação.a
