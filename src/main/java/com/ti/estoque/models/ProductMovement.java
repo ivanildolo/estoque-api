@@ -38,11 +38,16 @@ public class ProductMovement {
     @JsonProperty("movement_date")
     private LocalDateTime movementDate;
 
+    @PrePersist
+    public void prePersist() {
+        this.movementDate = LocalDateTime.now();
+    }
+
+
     public ProductMovement(Product product, int quantity, MovementType movementType) {
         this.product = product;
         this.quantity = quantity;
         this.movementType = movementType;
-        this.movementDate = LocalDateTime.now();
         ;
     }
 }

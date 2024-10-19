@@ -6,6 +6,7 @@ import com.ti.estoque.models.Product;
 import com.ti.estoque.models.ProductMovement;
 import com.ti.estoque.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,30 +59,27 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
-    public Product updateStockEntry(Long id, Integer quantityChange) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Produto com ID " + id + " não encontrado."));
-
-        if (product.getStockQuantity() + quantityChange <= 0) {
-            throw new IllegalArgumentException("Quantidade tem que ser maior que 0.");
-        }
-
-        product.setStockQuantity(product.getStockQuantity() + quantityChange);
-        product.getMovements().add(new ProductMovement(product, quantityChange, MovementType.ENTRY));
-        return productRepository.save(product);
+    @Transactional
+    public void addStock(Long productId, int quantity) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
+        product.setStockQuantity(product.getStockQuantity() + quantity);
+        product.getMovements().add(new ProductMovement(product, quantity, MovementType.ENTRY));
+        productRepository.save(product);
     }
 
-    public Product updateStockExit(Long id, Integer quantityChange) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Produto com ID " + id + " não encontrado."));
+    @Transactional
+    public void removeStock(Long productId, int quantity) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
 
-        if (product.getStockQuantity() + quantityChange <= 0) {
-            throw new IllegalArgumentException("Quantidade tem que ser maior que 0.");
+        if (product.getStockQuantity() < quantity) {
+            throw new IllegalArgumentException("Quantidade indisponível no estoque.");
         }
 
-        product.setStockQuantity(product.getStockQuantity() + quantityChange);
-        product.getMovements().add(new ProductMovement(product, quantityChange, MovementType.EXIT));
-        return productRepository.save(product);
+        product.setStockQuantity(product.getStockQuantity() - quantity);
+        product.getMovements().add(new ProductMovement(product, quantity, MovementType.EXIT));
+        productRepository.save(product);
     }
 
     public List<Product> findByStockQuantityLessThan(int minimumQuantity) {
@@ -93,15 +91,13 @@ public class ProductService {
     }
 
     public List<Product> getProductsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-        return productRepository.findBycreationDateBetween(startDate, endDate);
+        return productRepository.findByCreationDateBetween(startDate, endDate);
     }
 
     public List<Product> getProductsByDateRangeAndName(LocalDateTime start, LocalDateTime end, String name) {
         if (name == null || name.isEmpty()) {
-            // Se o nome não foi informado, busca apenas pelo intervalo de datas
-            return productRepository.findBycreationDateBetween(start, end);
+            return productRepository.findByCreationDateBetween(start, end);
         } else {
-            // Se o nome foi informado, busca pelo nome e intervalo de datas
             return productRepository.findByCreationDateBetweenAndNameContainingIgnoreCase(start, end, name);
         }
     }

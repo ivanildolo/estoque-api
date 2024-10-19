@@ -53,6 +53,11 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ProductMovement> movements = new ArrayList<>();;
 
+    @PrePersist
+    public void prePersist() {
+        this.creationDate = LocalDateTime.now();
+    }
+
     public Product(String name, String category, Integer stockQuantity, Double price, String warehouseLocation, String description) {
         this.name = name;
         this.category = category;
@@ -60,7 +65,6 @@ public class Product {
         this.price = price;
         this.warehouseLocation = warehouseLocation;
         this.description = description;
-        this.creationDate = LocalDateTime.now();
     }
 
 }

@@ -1,6 +1,7 @@
 package com.ti.estoque.controllers;
 
 import com.ti.estoque.dto.ProductSearchDTO;
+import com.ti.estoque.dto.StockOperationDTO;
 import com.ti.estoque.models.Product;
 import com.ti.estoque.services.ProductService;
 import jakarta.validation.Valid;
@@ -48,18 +49,20 @@ public class ProdutoController {
 		return ResponseEntity.noContent().build();
 	}
 
-	// Endpoint para entrada de produtos
-	@PostMapping("/stock-in/{id}")
-	public ResponseEntity<Product> stockIn(@PathVariable Long id, @RequestParam Integer quantity) {
-		Product product = productService.updateStockEntry(id, quantity);
-		return ResponseEntity.ok(product);
+	// Rota para entrada de produtos no estoque
+	@PostMapping("/stock-in")
+	public ResponseEntity<String> stockIn(@Valid @RequestBody StockOperationDTO stockOperationDTO) {
+		// Validar a entrada e chamar o serviço para adicionar estoque
+		productService.addStock(stockOperationDTO.getProductId(), stockOperationDTO.getQuantity());
+		return ResponseEntity.ok("Estoque atualizado com sucesso.");
 	}
 
-	// Endpoint para saída de produtos
-	@PostMapping("/stock-out/{id}")
-	public ResponseEntity<Product> stockOut(@PathVariable Long id, @RequestParam Integer quantity) {
-		Product product = productService.updateStockExit(id, quantity);
-		return ResponseEntity.ok(product);
+	// Rota para saída de produtos do estoque
+	@PostMapping("/stock-out")
+	public ResponseEntity<String> stockOut(@Valid @RequestBody StockOperationDTO stockOperationDTO) {
+		// Validar a saída e chamar o serviço para remover estoque
+		productService.removeStock(stockOperationDTO.getProductId(), stockOperationDTO.getQuantity());
+		return ResponseEntity.ok("Estoque reduzido com sucesso.");
 	}
 
 	@GetMapping("/report/excess-stock")

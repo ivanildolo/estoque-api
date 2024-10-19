@@ -26,7 +26,7 @@ public class SeedData implements CommandLineRunner {
 
     private void seedDatabase() {
         if (productRepository.count() > 0) {
-            return; // Se já existem produtos, não insere novos
+            return;
         }
 
         List<Product> products = new ArrayList<>();

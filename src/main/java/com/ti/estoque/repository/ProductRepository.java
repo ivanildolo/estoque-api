@@ -12,7 +12,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByStockQuantityGreaterThan(int maxQuantity);
 
-    List<Product> findBycreationDateBetween(LocalDateTime startDate, LocalDateTime endDate);
+    List<Product> findByCreationDateBetween(LocalDateTime startDate, LocalDateTime endDate);
 
     List<Product> findByCreationDateBetweenAndNameContainingIgnoreCase(LocalDateTime start, LocalDateTime end, String name);
 }
