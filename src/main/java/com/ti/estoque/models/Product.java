@@ -5,15 +5,17 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
+@NoArgsConstructor
 @Table(name = "products")
 @Entity(name = "product")
-@AllArgsConstructor
-@NoArgsConstructor
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,5 +48,23 @@ public class Product {
     private String description;
 
     @JsonProperty("creation_date")
-    private String creationDate;
+    private LocalDateTime creationDate;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ProductMovement> movements = new ArrayList<>();;
+
+    @PrePersist
+    public void prePersist() {
+        this.creationDate = LocalDateTime.now();
+    }
+
+    public Product(String name, String category, Integer stockQuantity, Double price, String warehouseLocation, String description) {
+        this.name = name;
+        this.category = category;
+        this.stockQuantity = stockQuantity;
+        this.price = price;
+        this.warehouseLocation = warehouseLocation;
+        this.description = description;
+    }
+
 }
