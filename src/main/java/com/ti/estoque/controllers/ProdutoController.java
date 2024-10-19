@@ -1,5 +1,6 @@
 package com.ti.estoque.controllers;
 
+import com.ti.estoque.dto.ProductSearchDTO;
 import com.ti.estoque.models.Product;
 import com.ti.estoque.services.ProductService;
 import jakarta.validation.Valid;
@@ -50,14 +51,14 @@ public class ProdutoController {
 	// Endpoint para entrada de produtos
 	@PostMapping("/stock-in/{id}")
 	public ResponseEntity<Product> stockIn(@PathVariable Long id, @RequestParam Integer quantity) {
-		Product product = productService.updateStock(id, quantity);
+		Product product = productService.updateStockEntry(id, quantity);
 		return ResponseEntity.ok(product);
 	}
 
 	// Endpoint para saída de produtos
 	@PostMapping("/stock-out/{id}")
 	public ResponseEntity<Product> stockOut(@PathVariable Long id, @RequestParam Integer quantity) {
-		Product product = productService.updateStock(id, quantity);
+		Product product = productService.updateStockExit(id, quantity);
 		return ResponseEntity.ok(product);
 	}
 
@@ -71,15 +72,17 @@ public class ProdutoController {
 		return productService.findByStockQuantityLessThan(minQuantity);
 	}
 
-	@GetMapping("/between-dates")
+	@PostMapping("/search")
 	public ResponseEntity<List<Product>> getProductsBetweenDates(
-			@RequestParam String startDate,
-			@RequestParam String endDate) {
-		LocalDateTime start = LocalDateTime.parse(startDate + "T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-		LocalDateTime end = LocalDateTime.parse(endDate + "T23:59:59", DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+			@Valid @RequestBody ProductSearchDTO productSearchDTO) {
 
-		// Chamada do serviço
-		List<Product> products = productService.getProductsByDateRange(start, end);
+		// Converter as datas do DTO para LocalDateTime
+		LocalDateTime start = LocalDateTime.parse(productSearchDTO.getStartDate() + "T00:00:00",
+				DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		LocalDateTime end = LocalDateTime.parse(productSearchDTO.getEndDate() + "T23:59:59",
+				DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+		List<Product> products = productService.getProductsByDateRangeAndName(start, end, productSearchDTO.getName());
 		return ResponseEntity.ok(products);
 	}
 

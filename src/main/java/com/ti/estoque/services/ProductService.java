@@ -95,4 +95,15 @@ public class ProductService {
     public List<Product> getProductsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         return productRepository.findBycreationDateBetween(startDate, endDate);
     }
+
+    public List<Product> getProductsByDateRangeAndName(LocalDateTime start, LocalDateTime end, String name) {
+        if (name == null || name.isEmpty()) {
+            // Se o nome não foi informado, busca apenas pelo intervalo de datas
+            return productRepository.findBycreationDateBetween(start, end);
+        } else {
+            // Se o nome foi informado, busca pelo nome e intervalo de datas
+            return productRepository.findByCreationDateBetweenAndNameContainingIgnoreCase(start, end, name);
+        }
+    }
+
 }
