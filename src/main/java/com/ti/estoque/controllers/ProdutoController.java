@@ -1,5 +1,6 @@
 package com.ti.estoque.controllers;
 
+import com.ti.estoque.dto.ProductDTO;
 import com.ti.estoque.dto.ProductSearchDTO;
 import com.ti.estoque.dto.StockOperationDTO;
 import com.ti.estoque.models.Product;
@@ -22,9 +23,16 @@ public class ProdutoController {
 	private ProductService productService;
 
 	@PostMapping
-	public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product) {
-		Product newProduct = productService.saveProduct(product);
-		return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
+	public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductDTO prod) {
+		Product product = new Product();
+		product.setName(prod.getName());
+		product.setCategory(prod.getCategory());
+		product.setPrice(prod.getPrice());
+		product.setStockQuantity(prod.getStockQuantity());
+		product.setDescription(prod.getDescription());
+		product.setWarehouseLocation(prod.getWarehouseLocation());
+		Product savedProduct = productService.saveProduct(product);
+		return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
 	}
 
 	@PutMapping("/{id}")
@@ -49,18 +57,14 @@ public class ProdutoController {
 		return ResponseEntity.noContent().build();
 	}
 
-	// Rota para entrada de produtos no estoque
 	@PostMapping("/stock-in")
 	public ResponseEntity<String> stockIn(@Valid @RequestBody StockOperationDTO stockOperationDTO) {
-		// Validar a entrada e chamar o serviço para adicionar estoque
 		productService.addStock(stockOperationDTO.getProductId(), stockOperationDTO.getQuantity());
 		return ResponseEntity.ok("Estoque atualizado com sucesso.");
 	}
 
-	// Rota para saída de produtos do estoque
 	@PostMapping("/stock-out")
 	public ResponseEntity<String> stockOut(@Valid @RequestBody StockOperationDTO stockOperationDTO) {
-		// Validar a saída e chamar o serviço para remover estoque
 		productService.removeStock(stockOperationDTO.getProductId(), stockOperationDTO.getQuantity());
 		return ResponseEntity.ok("Estoque reduzido com sucesso.");
 	}
@@ -79,7 +83,6 @@ public class ProdutoController {
 	public ResponseEntity<List<Product>> getProductsBetweenDates(
 			@Valid @RequestBody ProductSearchDTO productSearchDTO) {
 
-		// Converter as datas do DTO para LocalDateTime
 		LocalDateTime start = LocalDateTime.parse(productSearchDTO.getStartDate() + "T00:00:00",
 				DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 		LocalDateTime end = LocalDateTime.parse(productSearchDTO.getEndDate() + "T23:59:59",
