@@ -1,56 +1,103 @@
 package com.ti.estoque.controllers;
 
-import java.util.List;
-
-import com.ti.estoque.models.Produto;
-import com.ti.estoque.services.ProdutoService;
+import com.ti.estoque.dto.ProductDTO;
+import com.ti.estoque.dto.ProductSearchDTO;
+import com.ti.estoque.dto.StockOperationDTO;
+import com.ti.estoque.models.Category;
+import com.ti.estoque.models.Product;
+import com.ti.estoque.services.CategoryService;
+import com.ti.estoque.services.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
-import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @RestController
-@RequestMapping("/produto")
+@RequestMapping("api/v1/products")
 public class ProdutoController {
 
-	@Autowired
-	private ProdutoService produtoService;
+	private final ProductService productService;
+	private final CategoryService categoryService;
+
+	ProdutoController(ProductService productService, CategoryService categoryService){
+		this.productService = productService;
+		this.categoryService = categoryService;
+	}
 
 	@PostMapping
-	public ResponseEntity<Produto> criarProduto(@Valid @RequestBody Produto produto) {
-		Produto novoProduto = produtoService.salvarProduto(produto);
-		return new ResponseEntity<>(novoProduto, HttpStatus.CREATED);
+	public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductDTO prod) {
+		Category category = categoryService.getCategoryById(prod.getCategoryId());
+		Product product = new Product();
+		product.setName(prod.getName());
+		product.setCategory(category);
+		product.setPrice(prod.getPrice());
+		product.setQuantity(prod.getQuantity());
+		product.setDescription(prod.getDescription());
+		product.setLocation(prod.getLocation());
+		Product savedProduct = productService.saveProduct(product);
+		return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Produto> atualizarProduto(@PathVariable Long id, @Valid @RequestBody Produto produtoAtualizado) {
-		Produto produtoAtualizadoBD = produtoService.atualizarProduto(id, produtoAtualizado);
-		return ResponseEntity.ok(produtoAtualizadoBD);
-	}
-
-	@PutMapping("/atualizar-estoque/{id}")
-	public ResponseEntity<Produto> atualizarEstoque(@PathVariable Long id, @RequestParam Integer quantidade) {
-		Produto produto = produtoService.atualizarEstoque(id, quantidade);
-		return ResponseEntity.ok(produto);
+	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductDTO ProductUupdated) {
+		Product productUupdatedBd = productService.updateProduct(id, ProductUupdated);
+		return ResponseEntity.ok(productUupdatedBd);
 	}
 
 	@GetMapping
-	public ResponseEntity<List<Produto>> listarTodos() {
-		return ResponseEntity.ok(produtoService.listarTodos());
+	public ResponseEntity<List<Product>> listAll() {
+		return ResponseEntity.ok(productService.listAll());
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<Produto> buscarPorId(@PathVariable Long id) {
-		return ResponseEntity.ok(produtoService.buscarPorId(id));
+	public ResponseEntity<Product> findById(@PathVariable Long id) {
+		return ResponseEntity.ok(productService.findById(id));
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deletarProduto(@PathVariable Long id) {
-		produtoService.deletarProduto(id);
+	public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+		productService.deleteById(id);
 		return ResponseEntity.noContent().build();
+	}
+
+	@PostMapping("/stock-in")
+	public ResponseEntity<String> stockIn(@Valid @RequestBody StockOperationDTO stockOperationDTO) {
+		productService.addStock(stockOperationDTO.getProductId(), stockOperationDTO.getQuantity());
+		return ResponseEntity.ok("Estoque atualizado com sucesso.");
+	}
+
+	@PostMapping("/stock-out")
+	public ResponseEntity<String> stockOut(@Valid @RequestBody StockOperationDTO stockOperationDTO) {
+		productService.removeStock(stockOperationDTO.getProductId(), stockOperationDTO.getQuantity());
+		return ResponseEntity.ok("Estoque reduzido com sucesso.");
+	}
+
+	@GetMapping("/report/excess-stock")
+	public List<Product> getStockQuantityGreaterThan(@RequestParam int maxQuantity) {
+		return productService.findByStockQuantityGreaterThan(maxQuantity);
+	}
+
+	@GetMapping("/report/low-stock")
+	public List<Product> getByStockQuantityLessThan(@RequestParam int minQuantity) {
+		return productService.findByStockQuantityLessThan(minQuantity);
+	}
+
+	@PostMapping("/search")
+	public ResponseEntity<List<Product>> getProductsBetweenDates(
+			@Valid @RequestBody ProductSearchDTO productSearchDTO) {
+
+		LocalDateTime start = LocalDateTime.parse(productSearchDTO.getStartDate() + "T00:00:00",
+				DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		LocalDateTime end = LocalDateTime.parse(productSearchDTO.getEndDate() + "T23:59:59",
+				DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+		List<Product> products = productService.getProductsByDateRangeAndName(start, end, productSearchDTO.getName());
+		return ResponseEntity.ok(products);
 	}
 
 }

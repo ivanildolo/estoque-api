@@ -15,12 +15,12 @@ Este projeto fornece uma API para gerenciamento de estoque, permitindo operaçõ
 
 Para rodar este projeto, você precisará das seguintes ferramentas:
 
-- **Java JDK 17** ou superior: O ambiente de desenvolvimento Java.
+- **Java JDK 21** ou superior: O ambiente de desenvolvimento Java.
 - **Maven**: Para gerenciamento de dependências e construção do projeto.
 - **IDE IntelliJ** (ou outra de sua preferência): Recomendada para desenvolvimento em Java.
 - **Docker**: Para executar o banco de dados Postgres.
 - **Git**: Para controle de versão do código.
--
+
 ## Instruções para Execução
 
 ### Rodar o Docker: Banco de Dados Postgres
@@ -54,4 +54,8 @@ Para rodar o projeto Spring Boot, você pode usar uma das seguintes ferramentas:
 1.  Abra o projeto na IntelliJ.
 2.  Certifique-se de que todas as dependências estão corretamente configuradas.
 3.  Clique com o botão direito na classe principal (geralmente marcada com `@SistemaDeGerenciamentoDeEstoque`).
-4.  Selecione "Run" para iniciar a aplicação.a
+4.  Edite configuracao do debug acrescente `--spring.profiles.active=dev` no campo Program arguments
+4.  Selecione "Run" para iniciar a aplicação.
+
+#### url api local: http://localhost:8080/api/v1/products
+#### Documentação da api http://localhost:8080/swagger-ui.html
