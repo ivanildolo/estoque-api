@@ -3,7 +3,9 @@ package com.ti.estoque.controllers;
 import com.ti.estoque.dto.ProductDTO;
 import com.ti.estoque.dto.ProductSearchDTO;
 import com.ti.estoque.dto.StockOperationDTO;
+import com.ti.estoque.models.Category;
 import com.ti.estoque.models.Product;
+import com.ti.estoque.services.CategoryService;
 import com.ti.estoque.services.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,24 +21,30 @@ import java.util.List;
 @RequestMapping("api/v1/products")
 public class ProdutoController {
 
-	@Autowired
-	private ProductService productService;
+	private final ProductService productService;
+	private final CategoryService categoryService;
+
+	ProdutoController(ProductService productService, CategoryService categoryService){
+		this.productService = productService;
+		this.categoryService = categoryService;
+	}
 
 	@PostMapping
 	public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductDTO prod) {
+		Category category = categoryService.getCategoryById(prod.getCategoryId());
 		Product product = new Product();
 		product.setName(prod.getName());
-		product.setCategory(prod.getCategory());
+		product.setCategory(category);
 		product.setPrice(prod.getPrice());
-		product.setStockQuantity(prod.getStockQuantity());
+		product.setQuantity(prod.getQuantity());
 		product.setDescription(prod.getDescription());
-		product.setWarehouseLocation(prod.getWarehouseLocation());
+		product.setLocation(prod.getLocation());
 		Product savedProduct = productService.saveProduct(product);
 		return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @Valid @RequestBody Product ProductUupdated) {
+	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductDTO ProductUupdated) {
 		Product productUupdatedBd = productService.updateProduct(id, ProductUupdated);
 		return ResponseEntity.ok(productUupdatedBd);
 	}

@@ -1,9 +1,11 @@
 package com.ti.estoque.services;
 
+import com.ti.estoque.dto.ProductDTO;
 import com.ti.estoque.enums.MovementType;
 import com.ti.estoque.exceptions.ResourceNotFoundException;
+import com.ti.estoque.models.Category;
 import com.ti.estoque.models.Product;
-import com.ti.estoque.models.ProductMovement;
+import com.ti.estoque.models.Movement;
 import com.ti.estoque.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -16,30 +18,36 @@ import java.util.List;
 @Service
 public class ProductService {
 
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
+    private final CategoryService categoryService;
+
+    ProductService(ProductRepository productRepository, CategoryService categoryService){
+         this.productRepository = productRepository;
+         this.categoryService = categoryService;
+    }
 
     public Product saveProduct(Product product) {
-        product.getMovements().add(new ProductMovement(product, product.getStockQuantity(), MovementType.ENTRY));
+        product.getMovements().add(new Movement(product, product.getQuantity(), MovementType.ENTRY, product.getLocation()));
         return productRepository.save(product);
     }
 
-    public Product updateProduct(Long id, Product productUpdated) {
+    public Product updateProduct(Long id, ProductDTO productUpdated) {
+        Category category = categoryService.getCategoryById(productUpdated.getCategoryId());
         Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto não encontrado"));
         product.setName(productUpdated.getName());
-        product.setCategory(productUpdated.getCategory());
+        product.setCategory(category);
         product.setPrice(productUpdated.getPrice());
-        product.setWarehouseLocation(productUpdated.getWarehouseLocation());
-        if (productUpdated.getStockQuantity() > product.getStockQuantity()) {
-            int quantity = productUpdated.getStockQuantity() - product.getStockQuantity();
-            product.getMovements().add(new ProductMovement(product, quantity, MovementType.ENTRY));
+        product.setLocation(productUpdated.getLocation());
+        if (productUpdated.getQuantity() > product.getQuantity()) {
+            int quantity = productUpdated.getQuantity() - product.getQuantity();
+            product.getMovements().add(new Movement(product, quantity, MovementType.ENTRY, productUpdated.getLocation()));
         }
-        if (productUpdated.getStockQuantity() < product.getStockQuantity()) {
-            int quantity =  product.getStockQuantity() - productUpdated.getStockQuantity();
+        if (productUpdated.getQuantity() < product.getQuantity()) {
+            int quantity =  product.getQuantity() - productUpdated.getQuantity();
 
-            product.getMovements().add(new ProductMovement(product, quantity, MovementType.EXIT));
+            product.getMovements().add(new Movement(product, quantity, MovementType.EXIT, productUpdated.getLocation()));
         }
-        product.setStockQuantity(productUpdated.getStockQuantity());
+        product.setQuantity(productUpdated.getQuantity());
 
         return productRepository.save(product);
     }
@@ -63,8 +71,8 @@ public class ProductService {
     public void addStock(Long productId, int quantity) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
-        product.setStockQuantity(product.getStockQuantity() + quantity);
-        product.getMovements().add(new ProductMovement(product, quantity, MovementType.ENTRY));
+        product.setQuantity(product.getQuantity() + quantity);
+        product.getMovements().add(new Movement(product, quantity, MovementType.ENTRY, product.getLocation()));
         productRepository.save(product);
     }
 
@@ -73,32 +81,32 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
 
-        if (product.getStockQuantity() < quantity) {
+        if (product.getQuantity() < quantity) {
             throw new IllegalArgumentException("Quantidade indisponível no estoque.");
         }
 
-        product.setStockQuantity(product.getStockQuantity() - quantity);
-        product.getMovements().add(new ProductMovement(product, quantity, MovementType.EXIT));
+        product.setQuantity(product.getQuantity() - quantity);
+        product.getMovements().add(new Movement(product, quantity, MovementType.EXIT, product.getLocation()));
         productRepository.save(product);
     }
 
     public List<Product> findByStockQuantityLessThan(int minimumQuantity) {
-        return productRepository.findByStockQuantityLessThan(minimumQuantity);
+        return productRepository.findByQuantityLessThan(minimumQuantity);
     }
 
     public List<Product> findByStockQuantityGreaterThan(int maxQuantity) {
-        return productRepository.findByStockQuantityGreaterThan(maxQuantity);
+        return productRepository.findByQuantityGreaterThan(maxQuantity);
     }
 
     public List<Product> getProductsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-        return productRepository.findByCreationDateBetween(startDate, endDate);
+        return productRepository.findByCreatedAtBetween(startDate, endDate);
     }
 
     public List<Product> getProductsByDateRangeAndName(LocalDateTime start, LocalDateTime end, String name) {
         if (name == null || name.isEmpty()) {
-            return productRepository.findByCreationDateBetween(start, end);
+            return productRepository.findByCreatedAtBetween(start, end);
         } else {
-            return productRepository.findByCreationDateBetweenAndNameContainingIgnoreCase(start, end, name);
+            return productRepository.findByCreatedAtBetweenAndNameContainingIgnoreCase(start, end, name);
         }
     }
 

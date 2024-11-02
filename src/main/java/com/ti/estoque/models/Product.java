@@ -1,16 +1,16 @@
 package com.ti.estoque.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Data
 @NoArgsConstructor
@@ -21,49 +21,43 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonProperty("name")
-    @NotBlank(message = "Nome é obrigatório")
+    @NotBlank
+    @Column(nullable = false, length = 150)
     private String name;
 
-    @JsonProperty("category")
-    @NotBlank(message = "Categoria é obrigatória")
-    private String category;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
-    @JsonProperty("stock_quantity")
-    @NotNull(message = "Quantidade em estoque é obrigatória")
-    @Min(value = 0, message = "A quantidade em estoque não pode ser negativa")
-    private Integer stockQuantity;
+    @Min(0)
+    @Column(nullable = false)
+    private int quantity;
 
-    @JsonProperty("price")
-    @NotNull(message = "Preço é obrigatório")
-    @Min(value = 0, message = "O preço não pode ser negativo")
-    private Double price;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
-    @JsonProperty("warehouse_location")
-    @NotBlank(message = "Localização no depósito é obrigatória")
-    private String warehouseLocation;
+    @Column(nullable = false)
+    private String location;
 
-    @JsonProperty("description")
-    @NotBlank(message = "Descrição é obrigatória")
     private String description;
 
-    @JsonProperty("creation_date")
-    private LocalDateTime creationDate;
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ProductMovement> movements = new ArrayList<>();;
+    private List<Movement> movements = new ArrayList<>();;
 
     @PrePersist
     public void prePersist() {
-        this.creationDate = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 
-    public Product(String name, String category, Integer stockQuantity, Double price, String warehouseLocation, String description) {
+    public Product(String name, Category category, Integer quantity, BigDecimal price, String location, String description) {
         this.name = name;
         this.category = category;
-        this.stockQuantity = stockQuantity;
+        this.quantity = quantity;
         this.price = price;
-        this.warehouseLocation = warehouseLocation;
+        this.location = location;
         this.description = description;
     }
 

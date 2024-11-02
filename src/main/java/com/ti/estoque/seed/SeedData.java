@@ -1,16 +1,18 @@
 package com.ti.estoque.seed;
 
 import com.ti.estoque.enums.MovementType;
+import com.ti.estoque.models.Category;
+import com.ti.estoque.models.Movement;
 import com.ti.estoque.models.Product;
-import com.ti.estoque.models.ProductMovement;
+import com.ti.estoque.repository.CategoryRepository;
+import com.ti.estoque.repository.MovementRepository;
 import com.ti.estoque.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigDecimal;
 
 @Component
 @Profile("dev")  // Este componente será ativado apenas no perfil de desenvolvimento
@@ -18,6 +20,12 @@ public class SeedData implements CommandLineRunner {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private MovementRepository movementRepository;
 
     @Override
     public void run(String... args) {
@@ -29,25 +37,50 @@ public class SeedData implements CommandLineRunner {
             return;
         }
 
-        List<Product> products = new ArrayList<>();
-        products.add(new Product( "Laptop", "Eletrônicos", 10, 2999.99, "Corredor 3, Prateleira C, Bin 8", "Laptop 16GB RAM"));
-        products.add(new Product("Smartphone", "Eletrônicos", 30, 1999.99, "Corredor 1, Prateleira A, Bin 1", "Smartphone 48MP"));
-        products.add(new Product( "Headphones", "Acessórios", 150, 199.99, "Corredor 2, Prateleira B, Bin 3", "Headphones Noise Cancelling"));
+        // Criar categorias
+        Category category1 = new Category();
+        category1.setName("Notebooks");
+        category1.setDescription("Notebooks de varias marcas");
+        categoryRepository.save(category1);
 
-        Product laptop = products.get(0);
-        laptop.getMovements().add(new ProductMovement(laptop, 50, MovementType.ENTRY));
-        laptop.getMovements().add(new ProductMovement(laptop, 40, MovementType.EXIT));
+        Category category2 = new Category();
+        category2.setName("Celulares");
+        category2.setDescription("Celulares de varias marcas");
+        categoryRepository.save(category2);
 
-        Product smartphone = products.get(1);
-        smartphone.getMovements().add(new ProductMovement(smartphone, 100, MovementType.ENTRY));
-        smartphone.getMovements().add(new ProductMovement(smartphone, 70, MovementType.EXIT));
+        // Criar produtos
+        Product product1 = new Product();
+        product1.setName("Laptop");
+        product1.setPrice(BigDecimal.valueOf(1000.00));
+        product1.setCategory(category1);
+        product1.setQuantity(10);
+        product1.setLocation("Corredor 1, Prateleira 1");
+        product1.setDescription("laptop sony HD 2TB 16GB Ram");
+        productRepository.save(product1);
 
-        Product headphones = products.get(2);
-        headphones.getMovements().add(new ProductMovement(headphones, 200, MovementType.ENTRY));
-        headphones.getMovements().add(new ProductMovement(headphones, 50, MovementType.EXIT));
+        Product product2 = new Product();
+        product2.setName("Celular Samsung");
+        product2.setPrice(BigDecimal.valueOf(150.00));
+        product2.setCategory(category2);
+        product2.setQuantity(150);
+        product2.setLocation("Corredor 6, Prateleira 1");
+        product2.setDescription("Celular Samsung 8G Ram 256GB HD");
+        productRepository.save(product2);
 
-        productRepository.saveAll(products);
+        // Criar e salvar movimentações
+        Movement movement1 = new Movement();
+        movement1.setProduct(product1); // Associar produto
+        movement1.setQuantity(10);
+        movement1.setMovementType(MovementType.ENTRY);
+        movement1.setLocation("Corredor 1, Prateleira 1");
+        movementRepository.save(movement1);
 
+        Movement movement2 = new Movement();
+        movement2.setProduct(product2); // Associar produto
+        movement2.setQuantity(100);
+        movement2.setLocation("Corredor 6, Prateleira 1");
+        movement2.setMovementType(MovementType.ENTRY); // Exemplo: "OUT" para saída
+        movementRepository.save(movement2);
         System.out.println("Produtos iniciais carregados no banco de dados.");
     }
 }

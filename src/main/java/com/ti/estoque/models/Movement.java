@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@Table(name = "product_movement")
-@Entity(name = "product_movement")
+@Table(name = "movements")
+@Entity(name = "movement")
 @NoArgsConstructor
-public class ProductMovement {
+public class Movement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
@@ -23,17 +23,17 @@ public class ProductMovement {
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     @JsonIgnore
-    @NotNull(message = "O product é obrigatória")
     private Product product;
 
-
-    @NotNull(message = "A propriedade quantity_changed é obrigatória")
     @JsonProperty("quantity")
     private int quantity;
 
-    @NotNull(message = "A propriedade movementType é obrigatória")
     @JsonProperty("movement_type")
+    @Enumerated(EnumType.STRING)
     private MovementType movementType;
+
+    @Column(nullable = false)
+    private String location;
 
     @JsonProperty("movement_date")
     private LocalDateTime movementDate;
@@ -44,10 +44,10 @@ public class ProductMovement {
     }
 
 
-    public ProductMovement(Product product, int quantity, MovementType movementType) {
+    public Movement(Product product, int quantity, MovementType movementType, String location) {
         this.product = product;
         this.quantity = quantity;
         this.movementType = movementType;
-        ;
+        this.location = location;
     }
 }

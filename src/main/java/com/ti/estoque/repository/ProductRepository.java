@@ -8,12 +8,12 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    List<Product> findByStockQuantityLessThan(int minimumQuantity);
+    List<Product> findByQuantityLessThan(int minimumQuantity);
 
-    List<Product> findByStockQuantityGreaterThan(int maxQuantity);
+    List<Product> findByQuantityGreaterThan(int maxQuantity);
 
-    List<Product> findByCreationDateBetween(LocalDateTime startDate, LocalDateTime endDate);
+    List<Product> findByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
 
-    List<Product> findByCreationDateBetweenAndNameContainingIgnoreCase(LocalDateTime start, LocalDateTime end, String name);
+    List<Product> findByCreatedAtBetweenAndNameContainingIgnoreCase(LocalDateTime start, LocalDateTime end, String name);
 }
 
