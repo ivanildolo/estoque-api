@@ -1,5 +1,6 @@
 package com.ti.estoque.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class Category {
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
+    @JsonProperty("created_at")
     private LocalDateTime createdAt;
 
     @PrePersist

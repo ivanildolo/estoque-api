@@ -42,6 +42,7 @@ public class Product {
     private String description;
 
     @Column(name = "created_at", updatable = false)
+    @JoinColumn(name = "created_at")
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

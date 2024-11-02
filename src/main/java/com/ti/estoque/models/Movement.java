@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -28,6 +29,9 @@ public class Movement {
     @JsonProperty("quantity")
     private int quantity;
 
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
+
     @JsonProperty("movement_type")
     @Enumerated(EnumType.STRING)
     private MovementType movementType;
@@ -44,10 +48,11 @@ public class Movement {
     }
 
 
-    public Movement(Product product, int quantity, MovementType movementType, String location) {
+    public Movement(Product product, int quantity, MovementType movementType, String location, BigDecimal price) {
         this.product = product;
         this.quantity = quantity;
         this.movementType = movementType;
         this.location = location;
+        this.price = price;
     }
 }

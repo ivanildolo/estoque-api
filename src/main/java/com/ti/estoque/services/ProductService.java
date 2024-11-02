@@ -27,7 +27,7 @@ public class ProductService {
     }
 
     public Product saveProduct(Product product) {
-        product.getMovements().add(new Movement(product, product.getQuantity(), MovementType.ENTRY, product.getLocation()));
+        product.getMovements().add(new Movement(product, product.getQuantity(), MovementType.ENTRY, product.getLocation(), product.getPrice()));
         return productRepository.save(product);
     }
 
@@ -40,12 +40,12 @@ public class ProductService {
         product.setLocation(productUpdated.getLocation());
         if (productUpdated.getQuantity() > product.getQuantity()) {
             int quantity = productUpdated.getQuantity() - product.getQuantity();
-            product.getMovements().add(new Movement(product, quantity, MovementType.ENTRY, productUpdated.getLocation()));
+            product.getMovements().add(new Movement(product, quantity, MovementType.ENTRY, productUpdated.getLocation(), product.getPrice()));
         }
         if (productUpdated.getQuantity() < product.getQuantity()) {
             int quantity =  product.getQuantity() - productUpdated.getQuantity();
 
-            product.getMovements().add(new Movement(product, quantity, MovementType.EXIT, productUpdated.getLocation()));
+            product.getMovements().add(new Movement(product, quantity, MovementType.EXIT, productUpdated.getLocation(),product.getPrice()));
         }
         product.setQuantity(productUpdated.getQuantity());
 
@@ -72,7 +72,7 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
         product.setQuantity(product.getQuantity() + quantity);
-        product.getMovements().add(new Movement(product, quantity, MovementType.ENTRY, product.getLocation()));
+        product.getMovements().add(new Movement(product, quantity, MovementType.ENTRY, product.getLocation(), product.getPrice()));
         productRepository.save(product);
     }
 
@@ -86,7 +86,7 @@ public class ProductService {
         }
 
         product.setQuantity(product.getQuantity() - quantity);
-        product.getMovements().add(new Movement(product, quantity, MovementType.EXIT, product.getLocation()));
+        product.getMovements().add(new Movement(product, quantity, MovementType.EXIT, product.getLocation(), product.getPrice()));
         productRepository.save(product);
     }
 

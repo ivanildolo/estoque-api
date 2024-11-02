@@ -71,6 +71,7 @@ public class SeedData implements CommandLineRunner {
         Movement movement1 = new Movement();
         movement1.setProduct(product1); // Associar produto
         movement1.setQuantity(10);
+        movement1.setPrice(BigDecimal.valueOf(1000));
         movement1.setMovementType(MovementType.ENTRY);
         movement1.setLocation("Corredor 1, Prateleira 1");
         movementRepository.save(movement1);
@@ -78,6 +79,7 @@ public class SeedData implements CommandLineRunner {
         Movement movement2 = new Movement();
         movement2.setProduct(product2); // Associar produto
         movement2.setQuantity(100);
+        movement2.setPrice(BigDecimal.valueOf(150));
         movement2.setLocation("Corredor 6, Prateleira 1");
         movement2.setMovementType(MovementType.ENTRY); // Exemplo: "OUT" para saída
         movementRepository.save(movement2);
