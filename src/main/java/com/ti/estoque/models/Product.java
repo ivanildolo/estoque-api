@@ -1,5 +1,6 @@
 package com.ti.estoque.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -42,7 +43,7 @@ public class Product {
     private String description;
 
     @Column(name = "created_at", updatable = false)
-    @JoinColumn(name = "created_at")
+    @JsonProperty("created_at")
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
