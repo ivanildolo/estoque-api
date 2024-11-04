@@ -8,14 +8,16 @@ import com.ti.estoque.models.Product;
 import com.ti.estoque.services.CategoryService;
 import com.ti.estoque.services.ProductService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/products")
@@ -65,16 +67,16 @@ public class ProdutoController {
 		return ResponseEntity.noContent().build();
 	}
 
-	@PostMapping("/stock-in")
+	@PostMapping(value = "/stock-in", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> stockIn(@Valid @RequestBody StockOperationDTO stockOperationDTO) {
 		productService.addStock(stockOperationDTO.getProductId(), stockOperationDTO.getQuantity());
-		return ResponseEntity.ok("Estoque atualizado com sucesso.");
+		return ResponseEntity.ok("");
 	}
 
 	@PostMapping("/stock-out")
 	public ResponseEntity<String> stockOut(@Valid @RequestBody StockOperationDTO stockOperationDTO) {
 		productService.removeStock(stockOperationDTO.getProductId(), stockOperationDTO.getQuantity());
-		return ResponseEntity.ok("Estoque reduzido com sucesso.");
+		return ResponseEntity.ok("");
 	}
 
 	@GetMapping("/report/excess-stock")
